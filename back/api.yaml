@@ -1,0 +1,342 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: "Stocks API"
+  description: "API for stocks market operations"
+servers:
+  - url: "http://localhost:8000"
+tags:
+  - name: admin
+    description: "Admin handles"
+  - name: user
+    desciprion: "User handles for general usage"
+paths:
+  /admin/add_company:
+    post:
+      tags:
+        - admin
+      summary: "Add new company into stocks market with initial stocks price and quantity"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                company_name:
+                  type: string
+                  minLength: 1
+                  description: "New company name"
+                init_stock_price:
+                  type: number
+                  description: "Initial company stock price"
+                  minimum: 0.0
+                init_stock_quantity:
+                  type: integer
+                  description: "Initial company's stocks quantity"
+                  minimum: 0
+      responses:
+        200:
+          description: "Id of created company"
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  company_id:
+                    type: string
+                    description: "Company's ID which will be used for company identification in future requests"
+  /admin/add_user:
+    post:
+      tags:
+        - admin
+      summary: "Add new user with given username"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                user_name:
+                  type: string
+                  minLength: 1
+                  description: "New user name"
+      responses:
+        200:
+          description: "Id of created user"
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  user_id:
+                    type: string
+                    description: "User's ID which will be used for user identification in future requests"
+  /admin/alter_stock_quantity:
+    post:
+      tags:
+        - admin
+      summary: "Changes company's stock quantity"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                company_id:
+                  type: string
+                  minLength: 1
+                  description: "company's identification"
+                difference:
+                  type: integer
+                  description: "How to change stock's quantity: may be negative"
+      responses:
+        200:
+          description: "New company's stock quantity"
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  company_id:
+                    type: string
+                    minLength: 1
+                    description: "company's identification"
+                  stock_quantity:
+                    type: integer
+                    description: "New company's stock quantity"
+  /admin/alter_stock_price:
+    post:
+      tags:
+        - admin
+      summary: "Changes company's stock price"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                company_id:
+                  type: string
+                  minLength: 1
+                  description: "company's identification"
+                new_price:
+                  type: number
+                  description: "New company's stock price"
+      responses:
+        200:
+          description: "Empty response"
+  /get_user_summary:
+    get:
+      tags:
+        - user
+      summary: "Get user's summary: balance and stocks in possession"
+      parameters:
+        - name: user_id
+          in: query
+          description: "User's id to fetch info for"
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  balance:
+                    type: number
+                    description: "User's balance"
+                  user_name:
+                    type: string
+                  stocks:
+                    type: array
+                    description: "User's stocks in possession"
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        company_id:
+                          type: string
+                        company_name:
+                          type: string
+                        stock_price:
+                          type: number
+                        quantity:
+                          type: integer
+        404:
+          description: "No users with such id"
+  /get_companies_summary:
+    get:
+      tags:
+        - user
+      summary: "Get companies stock summary"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  stocks:
+                    type: array
+                    description: "Companies stocks"
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        company_id:
+                          type: string
+                        company_name:
+                          type: string
+                        stock_price:
+                          type: number
+                        quantity:
+                          type: integer
+  /top_up_user_balance:
+    post:
+      tags:
+        - user
+      summary: "Changes company's stock price"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                user_id:
+                  type: string
+                  minLength: 1
+                  description: "user's identification"
+                amount:
+                  type: number
+                  description: "Amount which will be added into user balance"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  new_balance:
+                    type: number
+                    description: "New user's balance"
+                  user_id:
+                    type: string
+  /buy_stocks:
+    post:
+      tags:
+        - user
+      summary: "User buys company's stocks"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                user_id:
+                  type: string
+                  minLength: 1
+                  description: "user's identification"
+                company_id:
+                  type: string
+                  minLength: 1
+                  description: "company's identification"
+                quantity:
+                  type: integer
+                  description: "Amount of stocks to buy"
+                  minimum: 1
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  transation_status:
+                    type: string
+                    description: "Transaction status"
+                    enum:
+                      - "SUCCESS"
+                      - "FAILURE"
+                  message:
+                    type: string
+        404:
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  error_message:
+                    type: string
+  /sell_stocks:
+    post:
+      tags:
+        - user
+      summary: "User sells company's stocks"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                user_id:
+                  type: string
+                  minLength: 1
+                  description: "user's identification"
+                company_id:
+                  type: string
+                  minLength: 1
+                  description: "company's identification"
+                quantity:
+                  type: integer
+                  description: "Amount of stocks to buy"
+                  minimum: 1
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  transation_status:
+                    type: string
+                    description: "Transaction status"
+                    enum:
+                      - "SUCCESS"
+                      - "FAILURE"
+                  message:
+                    type: string
+        404:
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  error_message:
+                    type: string

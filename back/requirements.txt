@@ -1,0 +1,5 @@
+psycopg2~=2.7.4
+Flask~=2.2.3
+flasgger~=0.9.5
+testcontainers~=3.7.1
+Flask-Cors~=3.0.10
